@@ -1,4 +1,4 @@
-# UCLH Catphan analysis software RH Lastupdate 05/05/2020. Please contact ryan.hulley@nhs.net with any enquires.  
+# UCLH Catphan analysis software
 from pylinac import CatPhan504
 import easygui
 folder = easygui.diropenbox()
@@ -6,5 +6,20 @@ mycbct = CatPhan504(folder) #This creates a mycbct object which we can then anal
 
 # Perform analysis
 mycbct.analyze() #This does the actual analysis of the .dcm files.
+
+# Some properties:
+print("##############################") #This makes it look nicer.
+print("Number of images = {}".format(mycbct.num_images) ) #The .format places the thing inside the curly brackets {}. In this case it is the number of images.
+print("CatPhan size = {}".format(mycbct.catphan_size) ) #Here we format it with the size of something.
+print("mm per pixel = {}".format(mycbct.mm_per_pixel) ) #Here we give the number of mm per pixel.
+print("##############################") #This makes it look nicer.
+# Results standard output
+
+print( mycbct.results() ) #This will print the results of the analysis. This is the same as what is later saved to a text file.
+
+
+
+#mycbct.plot_analyzed_image()
 summaryFileName = input("Write the name of the file: ") #This asks the user to enter in a name for the file which will be saved.
-mycbct.save_analyzed_image(summaryFileName+'.pdf')
+mycbct.publish_pdf(summaryFileName+'.pdf', open_file=False) #This creates a pdf of the results. We do not open it as we will be editing it later on.
+#mycbct.save_analyzed_image(summaryFileName+'.pdf')
