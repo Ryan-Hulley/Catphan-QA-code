@@ -1,77 +1,10 @@
-from sys import path as sysPath
-sysPath.append("O:\\protons\\Work in Progress\\Nat\\catphan") # how to find Nat's other programs
-RH edited here
-from pylinac import CatPhan504 #Pylinac is used to analyze the .dcm files
-import tkinter #Tkinter lets us use a window which asks you where the folder is
-from tkinter.filedialog import askopenfilename #This lets us open file names but is currently unused
-from tkinter.filedialog import askdirectory #This lets us use the window to ask about the directory
-import subprocess #This is used to let us open the pdf automatically in a browser.
-import os #The os module contains many functions related to the operating system, we use it to find the current file directory
-import editpdf #editpdf is the other python file. This is how we use it.
-import pydicom #Pydicom lets us look inside the .dcm files to find machine name and study time.
-print("finished imports") #This is to let us know when we finish importing everything. This is here for debugging purposes.
-
-
-root = tkinter.Tk() #This is needed to tkinter. It creates a tkinter object which would normally appear as a window but the next line hides it.
-root.withdraw() #This causes the tkinter window to hide. We dont want this window as all we need is the file dialog window.
-print("finished tk setup") #This is for debugging so if tkinter is causing errors we will know.
-
-# Get CBCT image
-#cbct_folder = r"\\krypton\rtp-share$\protons\Work in Progress\Nat\caphan\AdditionalDatasets\220120151703"  original file askdirectory
-
-foldername = askdirectory() #This function causes the file directory window to pop up. The string returned by it is put into the foldername variable.
-print("folder directory is: " + foldername) #We print the foldername variable which should look like a file path.
-cbct_folder = r""+ foldername #This sets the pylinac folder to the file path we just got. The r"" causes the string to be treated as a raw string and all escape codes are ignored. For instance, normally if you put \n in a string and printed it it would cause a new line to be created at that point. Adding r to the beginning would cause the \n to be printed and no newline would exist.
-mycbct = CatPhan504( cbct_folder ) #This creates a mycbct object which we can then analyze.
+# UCLH Catphan analysis software RH Lastupdate 05/05/2020. Please contact ryan.hulley@nhs.net with any enquires.  
+from pylinac import CatPhan504
+import easygui
+folder = easygui.diropenbox()
+mycbct = CatPhan504(folder) #This creates a mycbct object which we can then analyze.
 
 # Perform analysis
 mycbct.analyze() #This does the actual analysis of the .dcm files.
-
-# Some properties:
-print("##############################") #This makes it look nicer.
-print("Number of images = {}".format(mycbct.num_images) ) #The .format places the thing inside the curly brackets {}. In this case it is the number of images.
-print("CatPhan size = {}".format(mycbct.catphan_size) ) #Here we format it with the size of something.
-print("mm per pixel = {}".format(mycbct.mm_per_pixel) ) #Here we give the number of mm per pixel.
-print("##############################") #This makes it look nicer.
-# Results standard output
-print( mycbct.results() ) #This will print the results of the analysis. This is the same as what is later saved to a text file.
-
-# Save all results in standard format
-
-#mycbct.plot_analyzed_image()
-mycbct.save_analyzed_image("all_analysis_images.png") #This saves a png image of the graphs and other images.
-mycbct.publish_pdf("AnalysisResults.pdf", open_file=False) #This creates a pdf of the results. We do not open it as we will be editing it later on.
-
 summaryFileName = input("Write the name of the file: ") #This asks the user to enter in a name for the file which will be saved.
-
-with open(summaryFileName + ".txt","w") as f: #The with keyword lets us open a file in an indented block. When we open the file we are using w mode or write mode. It is important to give the file a new name as this will overwrite any existing files. As f makes the object called f so we then do f.write.
-    f.write( "No. images: {}\n".format(mycbct.num_images) ) #This write to the file the nubmer of images.
-    #f.write( "CatPhan size: {}\n".format(mycbct.catphan_size) )
-    #f.write( "mm per pixel: {}\n".format(mycbct.mm_per_pixel) )
-    # Standard output of results
-    f.write( mycbct.results() ) #This write to the file the results of the analysis.
-f.close() #This closes the file. Not needed as with open as should automatically close the file but I did not put this here and the progam still works, so perhaps it was put there for some unkown reason.
-
-firstFile = os.listdir(foldername)[0] #This gets a list of the files in the directory containing the .dcm files. We take the first file in the directory using [0] and make firstFile this result.
-print (firstFile)
-ds = pydicom.dcmread(foldername + "/" + firstFile) #This will open the .dcm file using pydicom so we can then look inside it and find out the time and machine name.
-stationName = ds.StationName #StationName allows us to find the specific header of the station name.
-studyTime = ds.StudyDate #StudyDate allows us to find the specific header of the study date.
-print (stationName)
-print (studyTime)
-editpdf.editPdfFunc("AnalysisResults", stationName, studyTime) #This calls to the other file and gets it to edit the pdf to add the two strings we just got.
-
-subprocess.Popen(["EditedPDF2.pdf"],shell=True) #This will open the pdf up in a browser.
-
-
-#mycbct.plot_analyzed_image()
-#mycbct.save_analyzed_image("all_analysis_images.png")
-#mycbct.publish_pdf("AnalysisResults.pdf", open_file=True)
-
-## Generate separate images of all available plots
-#mycbct.save_analyzed_subimage('hu_lin_img.png',subimage='hu')
-#mycbct.save_analyzed_subimage('uniformity.png',subimage='un')
-#mycbct.save_analyzed_subimage('spatial_resolutino.png',subimage='sp')
-#mycbct.save_analyzed_subimage('mtf.png',subimage='mtf')
-#mycbct.save_analyzed_subimage('hu_lin_vals.png',subimage='lin')
-#mycbct.save_analyzed_subimage('uniformity_profiles.png',subimage='prof')
+mycbct.save_analyzed_image(summaryFileName+'.pdf')
