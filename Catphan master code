@@ -1,6 +1,6 @@
 from sys import path as sysPath
 sysPath.append("O:\\protons\\Work in Progress\\Nat\\catphan") # how to find Nat's other programs
-
+RH edited here
 from pylinac import CatPhan504 #Pylinac is used to analyze the .dcm files
 import tkinter #Tkinter lets us use a window which asks you where the folder is
 from tkinter.filedialog import askopenfilename #This lets us open file names but is currently unused
